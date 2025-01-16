@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Task List{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Task List</h1>
+
+<div class="d-flex justify-content-center mb-3">
+    <a href="?status=all" class="btn btn-outline-primary {% if filter_status == 'all' %}active{% endif %}">All</a>
+    <a href="?status=completed" class="btn btn-outline-success {% if filter_status == 'completed' %}active{% endif %}">Completed</a>
+    <a href="?status=not_completed" class="btn btn-outline-danger {% if filter_status == 'not_completed' %}active{% endif %}">Not Completed</a>
+</div>
+
+<form method="post" id="bulk-delete-form">
+    {% csrf_token %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="select-all"></th> <!-- Чекбокс для выделения всех -->
+                <th>Title</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr>
+                <td><input type="checkbox" name="tasks" value="{{ task.id }}"></td>
+                <td><a href="{{ task.id }}/">{{ task.title }}</a></td>
+                <td>{{ task.due_date }}</td>
+                <td>
+                    {% if task.completed %}
+                        <span class="badge bg-success">Completed</span>
+                    {% else %}
+                        <span class="badge bg-danger">Not Completed</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ task.id }}/toggle/" class="btn btn-sm btn-warning">Toggle Status</a>
+                    <a href="{{ task.id }}/edit/" class="btn btn-sm btn-primary">Edit</a>
+                    <a href="{{ task.id }}/delete/" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-danger">Delete Selected</button>
+</form>
+
+<a href="create/" class="btn btn-success">Create New Task</a>
+
+<script>
+    // Скрипт для выделения всех чекбоксов
+    document.getElementById('select-all').addEventListener('change', function(e) {
+        const checkboxes = document.querySelectorAll('input[name="tasks"]');
+        checkboxes.forEach(cb => cb.checked = e.target.checked);
+    });
+</script>
+{% endblock %}
